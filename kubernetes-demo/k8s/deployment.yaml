@@ -1,0 +1,59 @@
+apiVersion: apps/v1
+kind: Deployment
+
+metadata:
+  name: kubernetes-demo-api           # Deployment name
+  labels:
+    app: kubernetes-demo-api          # Label for grouping/selecting resources
+
+# Kubernetes continuously works to make the actual state match this spec.
+spec:
+  replicas: 2                         # Number of pod replicas
+
+  selector:
+    matchLabels:
+      app: kubernetes-demo-api        # MUST match template.metadata.labels
+
+  template:
+    metadata:
+      labels:
+        app: kubernetes-demo-api      # Label applied to pods
+
+    spec:
+      containers:
+        - name: kubernetes-demo-api   # Container name
+          image: prolaxmi/kubernetes-demo-api:latest
+
+          ports:
+            - containerPort: 3000     # Port exposed inside the container
+
+          env:
+            - name: NODE_ENV
+              value: "production"
+
+            - name: POD_NAME           # Inject pod name from Kubernetes metadata
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+
+          resources:
+            requests:                 # Minimum guaranteed resources
+              cpu: "100m"
+              memory: "128Mi"
+            limits:                   # Maximum allowed resources
+              cpu: "500m"
+              memory: "512Mi"
+
+          readinessProbe:             # Controls when pod is ready to receive traffic
+            httpGet:
+              path: /readyz
+              port: 3000
+            initialDelaySeconds: 5
+            periodSeconds: 10
+
+          livenessProbe:              # Controls when pod should be restarted
+            httpGet:
+              path: /healthz
+              port: 3000
+            initialDelaySeconds: 10
+            periodSeconds: 20

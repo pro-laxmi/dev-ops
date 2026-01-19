@@ -1,0 +1,28 @@
+# What Compose does internally When you run:
+# docker compose up
+
+# Compose checks:
+# Does this service already exist?
+# Is the configuration unchanged?
+# Is the container stopped or running?
+
+# Then:
+# ✅ Reuses existing containers
+# ❌ Does NOT recreate unless needed
+
+# But in docker run you are saing everytime to make a new container
+
+### Docker Compose is used because it defines the desired state of an application stack and safely reuses existing resources instead of blindly creating new ones each time.
+
+# docker run -e CHOKIDAR_USEPOLLING=true -p 5173:5173 -v "$(pwd):/app" -v /app/node_modules react-docker
+services:
+  web:
+    build:
+      context: .
+    ports:
+      - 5173:5173
+    volumes:
+      - .:/app
+      - /app/node_modules
+    environment:
+      - CHOKIDAR_USEPOLLING=true
